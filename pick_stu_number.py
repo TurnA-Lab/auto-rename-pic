@@ -244,7 +244,8 @@ class PickStuNumber:
 
 
 def main():
-    PickStuNumber("./pics", show_img=False).print_info().write_out()
+    """请自行寻找测试数据"""
+    # PickStuNumber("./pics", show_img=False).print_info().write_out()
     # PickStuNumber("./pics/test.jpeg", show_img=True).print_info()
     # PickStuNumber("./pics/IMG.jpg", show_img=True).print_info()
     # PickStuNumber("./pics/IMG_023.jpg", show_img=True).print_info()
