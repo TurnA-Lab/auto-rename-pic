@@ -1,0 +1,8 @@
+# 编辑器
+/.idea/
+*.iml
+
+/pics/
+/output_dup/
+/output_fail/
+/output_suc/
