@@ -1,7 +1,8 @@
-cnocr==1.2.2
-opencv_python==4.2.0.32
-click==7.1.1
-tqdm==4.54.1
-numpy==1.18.1
 cnstd==0.1.1
+tqdm==4.54.1
+cnocr==1.2.2
+click==7.1.1
+numpy==1.18.1
 beeprint==2.4.10
+opencv_python==4.2.0.32
+PySimpleGUI==4.32.1
