@@ -37,7 +37,7 @@ def main():
     make_dpi_aware()
 
     # 设置主题
-    sg.theme('Material 1')
+    sg.theme('Light Grey 4')
 
     # 图片文件夹路径
     img_folder = {
@@ -79,7 +79,7 @@ def main():
                        key=img_folder.get('key'), size=(25, 1)),
               sg.FolderBrowse(button_text='浏览')],
              [sg.OK(button_text='立即开始')],
-             [sg.Output(size=(40, 10))]]
+             [sg.Output(size=(30, 10))]]
 
     # 配置
     config = [[sg.Frame(title='处理配置',
@@ -137,6 +137,9 @@ def main():
         if event == sg.WIN_CLOSED:
             break
         elif event == '立即开始':
+            # 禁用关闭
+            window.DisableClose = True
+
             print('即将开始处理图片')
             print('请在处理完毕后再关闭本窗口\n')
             print('-' * 30)
@@ -149,6 +152,9 @@ def main():
             print()
             print('-' * 30)
             print('处理完毕')
+
+            # 启用关闭
+            window.DisableClose = False
 
         elif event == '保存':
             for key in {img_folder.get('key'), show_img.get('keyT'), output.get('key'),
