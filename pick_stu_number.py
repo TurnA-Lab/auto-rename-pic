@@ -19,7 +19,7 @@ from tqdm import tqdm
 
 class PickStuNumber:
     def __init__(self, path: str, show_img: bool = False):
-        self.__ext = {'jpg', 'jpeg', 'png'}
+        self.__ext = {'jpg', 'jpeg'}
         self.__ocr = CnOcr(model_name='densenet-lite-gru', cand_alphabet=string.digits, name=path)
         self.__std = CnStd(name=path)
         self.__info_dict = {}
@@ -31,8 +31,9 @@ class PickStuNumber:
         # 根据传入的路径判断操作
         if os.path.isdir(path) or os.path.isfile(path):
             files = [self.__format_path(os.path.join(path, f)) for f in os.listdir(path) if
-                     os.path.isfile(os.path.join(path, f)) and self.__is_image(f)] \
-                if os.path.isdir(path) else [path]
+                     (os.path.isfile(os.path.join(path, f)) and self.__is_image(f))] \
+                if os.path.isdir(path) \
+                else [path]
             for file in tqdm(files):
                 self.__handle_info(file,
                                    self.__ocr_number(self.__std_number(self.__cutter(file, show_img))))
@@ -63,11 +64,18 @@ class PickStuNumber:
         :param show_img: 是否需要展示图片
         :return: 图片对应的 ndarray
         """
+        print(path)
+
         # 以灰度模式读取图片
         origin_img = cv2.imread(path, 0)
 
+        if show_img:
+            # 自由拉伸窗口
+            # cv2.namedWindow('bin img', 0)
+            cv2.imshow('origin img', origin_img)
+
         # 切出一部分，取值是经验值
-        origin_img = origin_img[:origin_img.shape[0] // 3 * 2]
+        origin_img = origin_img[:origin_img.shape[0] // 2]
 
         # 二值化
         _, origin_img = cv2.threshold(origin_img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
@@ -92,7 +100,7 @@ class PickStuNumber:
             x, y, w, h = cv2.boundingRect(contours[1])
 
             # 目前所有的数值设定使用的是经验值
-            if w * h > 10000:
+            if w * h > 250000:
                 # 需要识别的学号部分
                 # 左上角坐标
                 left_top_x = x
@@ -103,9 +111,9 @@ class PickStuNumber:
 
                 img = origin_img[left_top_y:right_down_y, left_top_x:right_down_x]
             else:
-                img = origin_img[160:origin_img.shape[0] // 2]
+                img = origin_img[120:]
         else:
-            img = origin_img[160:origin_img.shape[0] // 2]
+            img = origin_img[120:]
 
         # 对切出的图片进行再次处理，以便图像识别
         kernel = numpy.ones((2, 2), dtype=numpy.uint8)
@@ -137,7 +145,7 @@ class PickStuNumber:
         :param img:
         :return:
         """
-        return [i['cropped_img'] for i in self.__std.detect(img)][:2]
+        return [i['cropped_img'] for i in self.__std.detect(img)]
 
     @staticmethod
     def __handle_result_list(result_list: List[List[str]]) -> [str, bool]:
@@ -147,11 +155,15 @@ class PickStuNumber:
         :return: 结果，是否有效
         """
         result = result_list[0]
-        if len(result) >= 12:
-            result = ''.join(result[:12])
-            return result, re.match(r'\d{12}', result) is not None
-        else:
-            return None, False
+
+        if len(result) < 12 and len(result_list) > 1:
+            for i in result_list:
+                if len(i) >= 12:
+                    result = i
+
+        result = ''.join(result[:12] if len(result) >= 12 else result)
+        print(result, re.match(r'\d{12}', result) is not None)
+        return result, re.match(r'\d{12}', result) is not None
 
     def __handle_dup_name(self, name, path):
         dup_keys = self.__dup_name_dict.get(name)
@@ -233,10 +245,10 @@ class PickStuNumber:
                 elif value.get('legal') is True and value.get('dup') is True:
                     index = self.__dup_name_dict[value.get("name")].index(key)
                     copyfile(key,
-                             os.path.join(dup,
-                                          f'{value.get("name")}.{index}.{value.get("suffix")}'))
+                             os.path.join(dup, f'{value.get("name")}.{index}.{value.get("suffix")}'))
                 else:
-                    copyfile(key, os.path.join(fail, os.path.split(key)[1]))
+                    copyfile(key,
+                             os.path.join(fail, f'{value.get("name")}.{value.get("suffix")}' or os.path.split(key)[1]))
         else:
             print(f'“{path}” 并非一个合法的路径！')
 

@@ -144,14 +144,18 @@ def main():
             print('请在处理完毕后再关闭本窗口\n')
             print('-' * 30)
 
-            PickStuNumber(values.get(img_folder.get('key')), values.get(show_img.get('key'))).write_out(
-                values.get(output.get('key')), values.get(output_suc.get('key')),
-                values.get(output_dup.get('key')),
-                values.get(output_fail.get('key')))
+            PickStuNumber(
+                values.get(img_folder.get('key')),
+                sg.user_settings_get_entry(show_img.get('key'), show_img.get('default'))) \
+                .write_out(
+                sg.user_settings_get_entry(output.get('key'), output.get('default')),
+                sg.user_settings_get_entry(output_suc.get('key'), output_suc.get('default')),
+                sg.user_settings_get_entry(output_dup.get('key'), output_dup.get('default')),
+                sg.user_settings_get_entry(output_fail.get('key'), output_fail.get('default')))
 
             print()
-            print('-' * 30)
             print('处理完毕')
+            print('-' * 30)
 
             # 启用关闭
             window.DisableClose = False
